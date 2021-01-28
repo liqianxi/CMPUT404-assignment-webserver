@@ -17,7 +17,7 @@ https://emalsha.wordpress.com/2016/11/24/how-create-http-server-using-python-soc
 Contributors / Licensing
 ========================
 
-Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
+Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.<br />
 Everything added in 2021 is LICENSE'D under the Apache 2 license by Qianxi Li.<br />
 
 server.py contains contributions from:
