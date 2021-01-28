@@ -18,6 +18,7 @@ Contributors / Licensing
 ========================
 
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
+Everything added in 2021 is LICENSE'D under the Apache 2 license by Qianxi Li.<br />
 
 server.py contains contributions from:
 
