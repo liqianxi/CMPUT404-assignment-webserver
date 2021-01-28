@@ -1,6 +1,5 @@
 #  coding: utf-8 
 import socketserver
-
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +25,134 @@ import socketserver
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
+import re
+import os
+import requests
+
+
+not_found_html = '''
+<!DOCTYPE html>
+    <html>
+        <body>
+            <h2>Error 404: File not found</h2>
+        </body>
+    </html>'''
+
+method_not_allowed ='''
+<!DOCTYPE html>
+    <html>
+        <body>
+            <h2>405 Method Not Allowed</h2>
+        </body>
+    </html>'''
 
 class MyWebServer(socketserver.BaseRequestHandler):
-    
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        header_firstline = self.data.decode().split("\n")[0]
+        file_requested_path = header_firstline.split(" ")[1]
+        method = header_firstline.split(" ")[0]
+
+        encode_type = 'utf-8'
+        response_header = ""
+        response = ""
+        file_name = ""
+        root_folder = "/www/"
+        folder_path = os.path.dirname(os.path.abspath(__file__))
+        full_file_path = ""
+        html_file_name = "index.html"
+        methods_not_handle = ["POST", 
+                              "PUT", 
+                              "DELETE"]
+
+        if method == "GET":
+            # now start to check which file has been requested.
+            #if file_requested_path == "/favicon.ico":
+            #    return
+
+            temp = (file_requested_path.startswith('/') and not 
+                    file_requested_path.endswith('/') and 
+                    os.path.isdir(folder_path 
+                                  + root_folder 
+                                  + file_requested_path[1:]))
+
+            if (file_requested_path == "/" or
+               (file_requested_path.startswith('/') and
+                file_requested_path.endswith('/'))):
+
+                # /   /deep/
+                # valid directory path, use index.html inside instead
+                full_file_path = self.handle_directory_path(folder_path, 
+                                                            root_folder, 
+                                                            file_requested_path, 
+                                                            html_file_name)
+                file_name = html_file_name
+
+                # set the header's first line to 200 OK
+                response_header = "HTTP/1.1 200 OK\n"
+                
+            elif temp:
+                # redirect link using 301
+                response_header = "HTTP/1.1 301 Moved Permanently\n"
+
+                full_file_path = (folder_path 
+                                  + root_folder 
+                                  + file_requested_path[1:]
+                                  + "/" 
+                                  + html_file_name)
+                file_name = html_file_name
+                
+            else:
+                full_file_path = (folder_path 
+                                  + root_folder 
+                                  + file_requested_path)
+                file_name = [i for i in file_requested_path.split('/') if i][-1]
+
+                # here we can set the header
+                response_header = "HTTP/1.1 200 OK\n"
+
+            try:
+                # try to open the file on that path, read it, then close it.
+                request_file = open(full_file_path, 'rb')
+                response = request_file.read()
+                request_file.close()
+                
+                # now check file_type
+                if re.search(".html\Z", file_name):
+                    # case when the file is html
+                    mime = "text/html"
+
+                elif(re.search(".css\Z", file_name)):
+                    # case when the file is css
+                    mime = "text/css"
+              
+                response_header += "Content-Type: {}".format(mime) + "\n\n"
+
+            except Exception as e:
+                response_header = "HTTP/1.1 404 Not Found\n"
+                response_header += "Content-Type: text/html"
+                response = not_found_html.encode(encode_type)
+    
+        elif method in methods_not_handle:
+            response_header = "HTTP/1.1 405 Method Not Allowed\n"
+            response_header += "Content-Type: text/html"
+            response = method_not_allowed.encode(encode_type)
+        
+        # concat the header and the body to get the full response
+        full_response = response_header.encode(encode_type) + response
+
+        # send out the response to the client
+        self.request.sendall(full_response)
+
+    def handle_directory_path(self, 
+                              folder_path, 
+                              root_folder, 
+                              file_requested_path, 
+                              html_file_name):
+        return (folder_path 
+                + root_folder 
+                + file_requested_path[1:] 
+                + html_file_name)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
