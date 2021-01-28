@@ -7,11 +7,11 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a simple webserver.
 
-No collaborators
-Reference:
-Emalsha https://emalsha.wordpress.com/author/emalsha/
-From emalsha.wordpress.com
-https://emalsha.wordpress.com/2016/11/24/how-create-http-server-using-python-socket-part-ii/
+No collaborators<br />
+Reference: <br />
+Emalsha https://emalsha.wordpress.com/author/emalsha/<br />
+From emalsha.wordpress.com<br />
+https://emalsha.wordpress.com/2016/11/24/how-create-http-server-using-python-socket-part-ii/<br />
 
 
 Contributors / Licensing
