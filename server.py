@@ -49,11 +49,17 @@ method_not_allowed ='''
 class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
+
+        # get the first line of the request
         header_firstline = self.data.decode().split("\n")[0]
+
+        # get the request file path
         file_requested_path = header_firstline.split(" ")[1]
+
+        # get the method it use
         method = header_firstline.split(" ")[0]
 
-        encode_type = 'utf-8'
+        encode_type = "utf-8"
         response_header = ""
         response = ""
         file_name = ""
@@ -67,42 +73,51 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         if method == "GET":
             # now start to check which file has been requested.
-            #if file_requested_path == "/favicon.ico":
-            #    return
-
-            temp = (file_requested_path.startswith('/') and not 
-                    file_requested_path.endswith('/') and 
-                    os.path.isdir(folder_path 
-                                  + root_folder 
-                                  + file_requested_path[1:]))
+            condition = (file_requested_path.startswith('/') and not 
+                         file_requested_path.endswith('/') and 
+                         os.path.isdir(folder_path 
+                                       + root_folder 
+                                       + file_requested_path[1:]))
 
             if (file_requested_path == "/" or
                (file_requested_path.startswith('/') and
                 file_requested_path.endswith('/'))):
-
-                # /   /deep/
+                # handle case like: http://127.0.0.1:8080/deep/
                 # valid directory path, use index.html inside instead
-                full_file_path = self.handle_directory_path(folder_path, 
-                                                            root_folder, 
-                                                            file_requested_path, 
-                                                            html_file_name)
+                # set the open file's path
+                full_file_path = (folder_path 
+                                  + root_folder 
+                                  + file_requested_path[1:] 
+                                  + html_file_name)
                 file_name = html_file_name
 
                 # set the header's first line to 200 OK
                 response_header = "HTTP/1.1 200 OK\n"
                 
-            elif temp:
+            elif condition:
+                # handle case like: http://127.0.0.1:8080/deep
                 # redirect link using 301
+                # set the open file's path
                 response_header = "HTTP/1.1 301 Moved Permanently\n"
 
+                # redirect to show this file
                 full_file_path = (folder_path 
                                   + root_folder 
                                   + file_requested_path[1:]
                                   + "/" 
                                   + html_file_name)
+
+                # set redirect address                  
+                response_header += ("Location: http://127.0.0.1:8080/"
+                                    + file_requested_path[1:] 
+                                    + "/" 
+                                    + "\n")
+
                 file_name = html_file_name
                 
             else:
+                # handle case like: http://127.0.0.1:8080/deep/index.html
+                # set the open file's path
                 full_file_path = (folder_path 
                                   + root_folder 
                                   + file_requested_path)
@@ -144,15 +159,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # send out the response to the client
         self.request.sendall(full_response)
 
-    def handle_directory_path(self, 
-                              folder_path, 
-                              root_folder, 
-                              file_requested_path, 
-                              html_file_name):
-        return (folder_path 
-                + root_folder 
-                + file_requested_path[1:] 
-                + html_file_name)
+        # for indentification purpose
+        self.request.sendall("Qianxi's server 1 ".encode(encode_type))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
