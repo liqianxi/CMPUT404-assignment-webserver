@@ -63,7 +63,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
         response_header = ""
         response = ""
         file_name = ""
-        root_folder = "/www/"
+        root_folder = (os.sep 
+                       + "www" 
+                       + os.sep)
         folder_path = os.path.dirname(os.path.abspath(__file__))
         full_file_path = ""
         html_file_name = "index.html"
@@ -73,15 +75,15 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         if method == "GET":
             # now start to check which file has been requested.
-            condition = (file_requested_path.startswith('/') and not 
-                         file_requested_path.endswith('/') and 
+            condition = (file_requested_path.startswith(os.sep) and not 
+                         file_requested_path.endswith(os.sep) and 
                          os.path.isdir(folder_path 
                                        + root_folder 
                                        + file_requested_path[1:]))
 
-            if (file_requested_path == "/" or
-               (file_requested_path.startswith('/') and
-                file_requested_path.endswith('/'))):
+            if (file_requested_path == os.sep or
+               (file_requested_path.startswith(os.sep) and
+                file_requested_path.endswith(os.sep))):
                 # handle case like: http://127.0.0.1:8080/deep/
                 # valid directory path, use index.html inside instead
                 # set the open file's path
@@ -104,13 +106,13 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 full_file_path = (folder_path 
                                   + root_folder 
                                   + file_requested_path[1:]
-                                  + "/" 
+                                  + os.sep 
                                   + html_file_name)
 
                 # set redirect address                  
                 response_header += ("Location: http://127.0.0.1:8080/"
                                     + file_requested_path[1:] 
-                                    + "/" 
+                                    + os.sep 
                                     + "\n")
 
                 file_name = html_file_name
@@ -121,7 +123,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 full_file_path = (folder_path 
                                   + root_folder 
                                   + file_requested_path)
-                file_name = [i for i in file_requested_path.split('/') if i][-1]
+                file_name = [i for i in file_requested_path.split(os.sep) \
+                             if i][-1]
 
                 # here we can set the header
                 response_header = "HTTP/1.1 200 OK\n"
