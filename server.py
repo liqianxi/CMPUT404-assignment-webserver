@@ -171,7 +171,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 response_header += "Content-Type: text/html\n"
                 response = not_found_html.encode(encode_type)
     
-        elif method in methods_not_handle:
+        else:
             response_header = "HTTP/1.1 405 Method Not Allowed\n"
             response_header += "Content-Type: text/html\n"
             response = method_not_allowed.encode(encode_type)
