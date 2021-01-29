@@ -39,6 +39,11 @@ import socketserver
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
+# stolen from Emalsha https://emalsha.wordpress.com/author/emalsha/
+# From emalsha.wordpress.com
+# https://emalsha.wordpress.com/2016/11/24/how-create-http-server-using-python-socket-part-ii/
+
+
 import re
 import os
 import requests
