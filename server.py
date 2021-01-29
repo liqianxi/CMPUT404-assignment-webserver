@@ -61,6 +61,7 @@ method_not_allowed ='''
     </html>'''
 
 class MyWebServer(socketserver.BaseRequestHandler):
+
     def handle(self):
         self.data = self.request.recv(1024).strip()
 
@@ -162,12 +163,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
             except Exception as e:
                 response_header = "HTTP/1.1 404 Not Found\n"
-                response_header += "Content-Type: text/html"
+                response_header += "Content-Type: text/html\n"
                 response = not_found_html.encode(encode_type)
     
         elif method in methods_not_handle:
             response_header = "HTTP/1.1 405 Method Not Allowed\n"
-            response_header += "Content-Type: text/html"
+            response_header += "Content-Type: text/html\n"
             response = method_not_allowed.encode(encode_type)
         
         # concat the header and the body to get the full response
@@ -185,7 +186,6 @@ if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
     # Create the server, binding to localhost on port 8080
     server = socketserver.TCPServer((HOST, PORT), MyWebServer)
-
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
